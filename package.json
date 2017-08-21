@@ -1,0 +1,24 @@
+{
+  "name": "markettrader",
+  "version": "1.0.0",
+  "description": "Market Trader Simulator",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glynnbird/markettrader.git"
+  },
+  "author": "Glynn Bird <glynn.bird@gmail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/glynnbird/markettrader/issues"
+  },
+  "homepage": "https://github.com/glynnbird/markettrader#readme",
+  "dependencies": {
+    "cloudant": "^1.8.0",
+    "express": "^4.15.4"
+  }
+}

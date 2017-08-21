@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M"
+    crossorigin="anonymous">
+</head>
+
+<body>
+  <div id="vue">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Market Trader</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+          aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+        </button>
+    </nav>
+      
+    <div class="container">
+        <div>
+          Press start to begin trading with $5000 of cash and $5000 worth of Bitcoin.<br >
+          <button v-if="!started" v-on:click="onClickStart" type="button" class="btn btn-primary">Start</button>
+        </div>
+        
+        <div v-if="started" class="container alert alert-secondary">
+          <div class="row">
+            <div class="col">
+              Portfolio
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              $ {{ usdbalance | twodp }} 
+            </div>
+            <div class="col">
+              {{ btcbalance | twodp}} BTC
+            </div>
+            <div class="col">
+              TOTAL $ {{ total | twodp }}
+            </div>
+          </div>
+        </div>
+
+        <div v-if="started" class="collapse navbar-collapse" id="navbarSupportedContent">
+            $ {{ usdbalance | twodp }}  {{ btcbalance | twodp}} BTC   ----- PORTFOlIO TOTAL $ {{ total | twodp }}
+        </div>
+
+        <div v-if="started" class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+          <div class="btn-group mr-2" role="group" aria-label="First group">
+            <button v-on:keyup.left="onClickBuyAll" v-on:click="onClickBuyAll" type="button" class="btn btn-secondary">Buy All</button>
+          </div>
+          <div class="btn-group mr-2" role="group" aria-label="First group">
+            <button v-on:click="onClickBuy" type="button" class="btn btn-secondary">Buy 10%</button>
+          </div>
+          <div class="btn-group mr-2" role="group" aria-label="Second group">
+            <button v-on:click="onClickSell" type="button" class="btn btn-secondary">Sell 10%</button>
+          </div>
+          <div class="btn-group mr-2" role="group" aria-label="Second group">
+            <button v-on:keyup.right="onClickSellAll" v-on:click="onClickSellAll" type="button" class="btn btn-secondary">Sell All</button>
+          </div>
+        </div>
+
+        <div id="chart" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+      <!-- Content here -->
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1"
+    crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/vue"></script>
+  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="js/btc.js"></script>
+  <script src="js/markettrader.js"></script>
+</body>
+
+</html>
