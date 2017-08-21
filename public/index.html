@@ -46,16 +46,16 @@
 
         <div v-if="started" class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
           <div class="btn-group mr-2" role="group" aria-label="First group">
-            <button v-on:keyup.left="onClickBuyAll" v-on:click="onClickBuyAll" type="button" class="btn btn-secondary">Buy All</button>
+            <button v-on:keyup.left="onClickBuyAll" :disabled="usdbalance < 0.01" v-on:click="onClickBuyAll" type="button" class="btn btn-secondary">Buy All</button>
           </div>
           <div class="btn-group mr-2" role="group" aria-label="First group">
-            <button v-on:click="onClickBuy" type="button" class="btn btn-secondary">Buy 10%</button>
+            <button v-on:click="onClickBuy" :disabled="usdbalance < 0.01" type="button" class="btn btn-secondary">Buy 10%</button>
           </div>
           <div class="btn-group mr-2" role="group" aria-label="Second group">
-            <button v-on:click="onClickSell" type="button" class="btn btn-secondary">Sell 10%</button>
+            <button v-on:click="onClickSell" :disabled="btcbalance < 0.01" type="button" class="btn btn-secondary">Sell 10%</button>
           </div>
           <div class="btn-group mr-2" role="group" aria-label="Second group">
-            <button v-on:keyup.right="onClickSellAll" v-on:click="onClickSellAll" type="button" class="btn btn-secondary">Sell All</button>
+            <button v-on:keyup.right="onClickSellAll" :disabled="btcbalance < 0.01" v-on:click="onClickSellAll" type="button" class="btn btn-secondary">Sell All</button>
           </div>
         </div>
 
