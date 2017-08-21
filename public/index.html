@@ -52,10 +52,10 @@
             <button v-on:click="onClickBuy" :disabled="usdbalance < 0.01" type="button" class="btn btn-secondary">Buy 10%</button>
           </div>
           <div class="btn-group mr-2" role="group" aria-label="Second group">
-            <button v-on:click="onClickSell" :disabled="btcbalance < 0.01" type="button" class="btn btn-secondary">Sell 10%</button>
+            <button v-on:click="onClickSell" :disabled="btcbalance < 0.005" type="button" class="btn btn-secondary">Sell 10%</button>
           </div>
           <div class="btn-group mr-2" role="group" aria-label="Second group">
-            <button v-on:keyup.right="onClickSellAll" :disabled="btcbalance < 0.01" v-on:click="onClickSellAll" type="button" class="btn btn-secondary">Sell All</button>
+            <button v-on:keyup.right="onClickSellAll" :disabled="btcbalance < 0.005" v-on:click="onClickSellAll" type="button" class="btn btn-secondary">Sell All</button>
           </div>
         </div>
 
@@ -71,7 +71,7 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1"
     crossorigin="anonymous"></script>
   <script src="https://unpkg.com/vue"></script>
-  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
   <script src="https://code.highcharts.com/highcharts.js"></script>
   <script src="js/btc.js"></script>
   <script src="js/markettrader.js"></script>
