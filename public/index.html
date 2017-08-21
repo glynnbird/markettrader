@@ -13,16 +13,12 @@
   <div id="vue">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#">Market Trader</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-          aria-expanded="false" aria-label="Toggle navigation">
-              <span class="navbar-toggler-icon"></span>
-        </button>
     </nav>
       
     <div class="container">
-        <div>
+        <div v-if="!started" >
           Press start to begin trading with $5000 of cash and $5000 worth of Bitcoin.<br >
-          <button v-if="!started" v-on:click="onClickStart" type="button" class="btn btn-primary">Start</button>
+          <button v-on:click="onClickStart" type="button" class="btn btn-primary">Start</button>
         </div>
         
         <div v-if="started" class="container alert alert-secondary">
@@ -63,7 +59,7 @@
           </div>
         </div>
 
-        <div id="chart" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+        <div id="chart" style="min-width: 310px; height: 200px; margin: 0 auto"></div>
       <!-- Content here -->
     </div>
   </div>
