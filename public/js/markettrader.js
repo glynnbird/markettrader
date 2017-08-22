@@ -1,4 +1,35 @@
-var chart = null;
+
+var rsi = function(data) {
+  var n = data.length;
+  var totgain = 0;
+  var numgain = 0;
+  var totloss = 0;
+  var numloss = 0;
+  for(var i = 1; i < n; i++) {
+    if (i > 0) {
+      var a1 = data[i-1];
+      var a2 = data[i];
+      if (a2 > a1) {
+        totgain += a2 - a1;
+        numgain++;
+      } else if (a2 < a1) {
+        totloss += a1 - a2;
+        numloss++;
+      }
+    }
+  }
+  if (!numgain || !numloss) {
+    return 50;
+  }
+  var avgain = totgain / numgain;
+  var avloss = totloss / numloss;
+  if (avloss === 0) {
+    return 100;
+  }
+  var rs = avgain / avloss;
+  console.log(avgain, avloss, numgain, numloss);
+  return 100 - (100 / (1 + rs));
+};
 
 Vue.filter('twodp', function(value, decimals) {
   if(!value) {
@@ -19,10 +50,12 @@ var app = new Vue({
   el: '#vue',
   data: {
     i: 0,
+    losspertransaction: 0.2, // percent 0.2%
     btcinusd: 2600,
     btcbalance: 4,
     usdbalance: 10000.0,
-    log: [],
+    //log: [],
+    rsi: 50,
     graphdata: [],
     started: false
   },
@@ -39,20 +72,36 @@ var app = new Vue({
       app.usdbalance = 5000.0;
       app.btcbalance = 5000.0 / app.btcinusd;
       app.started = true;
+
+      setInterval(function () {
+        var x = Math.floor((new Date()).getTime() / 1000); // current time
+        var y = parseFloat(marketdata[app.i++]);
+        app.btcinusd = y;
+        
+        app.graphdata.push(y);
+        if (app.graphdata.length > 100) {
+          app.graphdata.shift();
+          app.rsi = rsi(app.graphdata);
+        } else {
+          app.rsi = 50;
+        }
+
+      }, 100);
+
     },
     buy: function(proportion) {
       if (app.usdbalance > 0.1) {
         var x = app.usdbalance * proportion;
-        app.log.unshift('Buying ' + x/app.btcinusd + ' BTC for $' + x);
-        app.btcbalance = app.btcbalance + x/app.btcinusd;
+        //app.log.unshift('Buying ' + x/app.btcinusd + ' BTC for $' + x);
+        app.btcbalance = (1.0 - app.losspertransaction/100)  * (app.btcbalance + x/app.btcinusd);
         app.usdbalance = app.usdbalance - x;
       }
     }, 
     sell: function(proportion) {
       if(app.btcbalance > 0.01) {
         var y = app.btcbalance*proportion;
-        app.log.unshift('Selling ' + y + ' BTC for $' + y*app.btcinusd);       
-        app.usdbalance = app.usdbalance +  app.btcinusd * y;
+        //app.log.unshift('Selling ' + y + ' BTC for $' + y*app.btcinusd);       
+        app.usdbalance = (1.0 - app.losspertransaction/100)  * (app.usdbalance +  app.btcinusd * y);
         app.btcbalance = app.btcbalance - y;
       }
     },
@@ -70,7 +119,7 @@ var app = new Vue({
     }
   }
 });
-
+/*
 Highcharts.setOptions({
   global: {
     useUTC: false
@@ -87,13 +136,22 @@ Highcharts.chart('chart', {
       load: function () {
         // set up the updating of the chart each second
         var series = this.series[0];
+        var rsiseries = this.series[1];
         setInterval(function () {
           var x = (new Date()).getTime(); // current time
           var y = marketdata[app.i++];
           app.btcinusd = y;
-          console.log(y);
-          //app.graphdata.push(y);
+          
+          app.graphdata.push(y);
+          if (app.graphdata.length > 30) {
+            app.graphdata.shift();
+            app.rsi = rsi(app.graphdata);
+          } else {
+            app.rsi = 50;
+          }
           series.addPoint([x, parseFloat(y)], true, true);
+          rsiseries.addPoint([x, app.rsi], true, true);
+          console.log(y, app.rsi);
         }, 300);
       }
     }
@@ -105,16 +163,28 @@ Highcharts.chart('chart', {
     type: 'datetime',
     tickPixelInterval: 150
   },
-  yAxis: {
+  yAxis: [ {
     title: {
-      text: 'Value'
+      text: 'Price USD'
     },
     plotLines: [{
       value: 0,
       width: 3,
       color: '#808080'
     }]
-  },
+  }, 
+  {
+    title: {
+      text: 'RSI'
+    },
+    plotLines: [{
+      value: 0,
+      width: 2,
+      color: '#FF0030'
+    }],
+    opposite: true
+  }
+  ],
   tooltip: {
     formatter: function () {
       return '<b>' + this.series.name + '</b><br/>' +
@@ -129,11 +199,12 @@ Highcharts.chart('chart', {
     enabled: false
   },
   series: [{
-    name: 'Random data',
+    name: 'Bitcoin price',
+    yaxis:1, 
     data: (function () {
       // generate an array of random data
       var data = [],
-        time = (new Date()).getTime(),
+        time = (new Date()).getTime() - 100,
         i;
 
       for (i = -99; i <= 0; i += 1) {
@@ -144,5 +215,23 @@ Highcharts.chart('chart', {
       }
       return data;
     }())
+  }, {
+    name: 'RSI',
+    yaxis: 2,
+    data: (function () {
+      // generate an array of random data
+      var data = [],
+        time = (new Date()).getTime() - 100,
+        i;
+
+      for (i = -99; i <= 0; i += 1) {
+        data.push({
+          x: time + i * 1000,
+          y: 50
+        });
+      }
+      return data;
+    }())
   }]
 });
+*/
