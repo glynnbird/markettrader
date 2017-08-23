@@ -11,7 +11,8 @@ var rsi = function(data) {
   var numgain = 0;
   var totloss = 0;
   var numloss = 0;
-  for(var i = 1; i < n; i++) {
+  
+  for(var i = n - 100; i < n; i++) {
     if (i > 0) {
       var a1 = data[i-1];
       var a2 = data[i];
