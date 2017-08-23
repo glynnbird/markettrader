@@ -1,3 +1,9 @@
+var plot = null;
+
+
+function update() {  
+
+}
 
 var rsi = function(data) {
   var n = data.length;
@@ -27,7 +33,7 @@ var rsi = function(data) {
     return 100;
   }
   var rs = avgain / avloss;
-  console.log(avgain, avloss, numgain, numloss);
+  //console.log(avgain, avloss, numgain, numloss);
   return 100 - (100 / (1 + rs));
 };
 
@@ -57,6 +63,7 @@ var app = new Vue({
     //log: [],
     rsi: 50,
     graphdata: [],
+    rsidata: [],
     started: false
   },
   computed: {
@@ -68,10 +75,42 @@ var app = new Vue({
     console.log('marketdata', marketdata.length);
   },
   methods: { 
+    getPrices: function() {
+      var series = [];
+      for(var i in app.graphdata) {
+        series.push([parseInt(i), app.graphdata[i]]);
+      }
+      return series;
+    },
+    getAutoScale: function() {
+      var min = 1000000;
+      var max = 0;
+      for(var i in app.graphdata) {
+        min = Math.min(app.graphdata[i], min);
+        max = Math.max(app.graphdata[i], max);
+      }
+      return {
+        min: Math.floor(min/1000) * 1000,
+        max: Math.floor((max + 1000)/1000) * 1000
+      };
+    },
     onClickStart: function() {
       app.usdbalance = 5000.0;
       app.btcbalance = 5000.0 / app.btcinusd;
       app.started = true;
+
+      plot = $.plot("#chart", [ ], {
+        series: {
+          shadowSize: 0	// Drawing is faster without shadows
+        },
+        yaxis: {
+          show:true
+        },
+        xaxis: {
+          min: 0,
+          max: 500
+        }
+      });
 
       setInterval(function () {
         var x = Math.floor((new Date()).getTime() / 1000); // current time
@@ -80,11 +119,27 @@ var app = new Vue({
         
         app.graphdata.push(y);
         if (app.graphdata.length > 100) {
-          app.graphdata.shift();
           app.rsi = rsi(app.graphdata);
         } else {
           app.rsi = 50;
         }
+
+
+        if (app.graphdata.length > 500) {
+          app.graphdata.shift();
+        }
+
+
+        
+        plot.setData([app.getPrices()]);
+        
+        // Since the axes don't change, we don't need to call plot.setupGrid()
+        var scale = app.getAutoScale();
+        opts = plot.getYAxes()[0].options
+        opts.min = scale.min;
+        opts.max = scale.max;
+        plot.setupGrid();
+        plot.draw();
 
       }, 100);
 
