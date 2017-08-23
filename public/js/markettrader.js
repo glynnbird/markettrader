@@ -82,6 +82,13 @@ var app = new Vue({
       }
       return series;
     },
+    getRSIs: function() {
+      var series = [];
+      for(var i in app.rsidata) {
+        series.push([parseInt(i), app.rsidata[i]]);
+      }
+      return series;
+    },
     getAutoScale: function() {
       var min = 1000000;
       var max = 0;
@@ -90,8 +97,8 @@ var app = new Vue({
         max = Math.max(app.graphdata[i], max);
       }
       return {
-        min: Math.floor(min/1000) * 1000,
-        max: Math.floor((max + 1000)/1000) * 1000
+        min: Math.floor(min/100) * 100,
+        max: Math.floor((max + 100)/100) * 100
       };
     },
     onClickStart: function() {
@@ -103,13 +110,11 @@ var app = new Vue({
         series: {
           shadowSize: 0	// Drawing is faster without shadows
         },
-        yaxis: {
-          show:true
+        legend: {
+          position: 'nw'
         },
-        xaxis: {
-          min: 0,
-          max: 500
-        }
+        yaxis: [ { position:'left'}, { min:0, max:100, position:'right' }],
+        xaxis: { min: 0, max: 500}
       });
 
       setInterval(function () {
@@ -123,21 +128,24 @@ var app = new Vue({
         } else {
           app.rsi = 50;
         }
+        app.rsidata.push(app.rsi);
 
 
         if (app.graphdata.length > 500) {
           app.graphdata.shift();
+          app.rsidata.shift();
         }
-
-
         
-        plot.setData([app.getPrices()]);
+        plot.setData([ { label:'Bitcoin', yaxis:1, data: app.getPrices()} , { label:'RSI', yaxis:2, data: app.getRSIs()} ]);
         
         // Since the axes don't change, we don't need to call plot.setupGrid()
         var scale = app.getAutoScale();
         opts = plot.getYAxes()[0].options
         opts.min = scale.min;
         opts.max = scale.max;
+        opts = plot.getYAxes()[1].options;
+        opts.min = 35;
+        opts.max = 65;
         plot.setupGrid();
         plot.draw();
 
