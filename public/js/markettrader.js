@@ -56,16 +56,17 @@ Vue.filter('twodp', function(value, decimals) {
 var app = new Vue({
   el: '#vue',
   data: {
+    mode:'start',
     i: 0,
     losspertransaction: 0.2, // percent 0.2%
-    btcinusd: 2600,
-    btcbalance: 4,
+    btcinusd: 1,
+    btcbalance: 0,
     usdbalance: 10000.0,
-    //log: [],
     rsi: 50,
     graphdata: [],
     rsidata: [],
-    started: false
+    marketdata: [],
+    interval: null
   },
   computed: {
     total: function() {
@@ -73,9 +74,18 @@ var app = new Vue({
     }
   },
   created: function () {
-    console.log('marketdata', marketdata.length);
+    this.loadMarketData();
   },
   methods: { 
+    loadMarketData: function() {
+      $.get({
+        url: 'https://reader.cloudant.com/bitcoin/_all_docs?limit=2000&descending=true&include_docs=true',
+        json: true
+      }).done(function(data) {
+        console.log(data);
+        app.marketdata = data.rows.map(function(d) { return d.doc.btcinusd}).reverse()
+      });
+    },
     getPrices: function() {
       var series = [];
       for(var i in app.graphdata) {
@@ -103,9 +113,11 @@ var app = new Vue({
       };
     },
     onClickStart: function() {
+      app.btcinusd = app.marketdata[0];
       app.usdbalance = 5000.0;
       app.btcbalance = 5000.0 / app.btcinusd;
-      app.started = true;
+      app.i = 0;
+      app.mode='running';
 
       plot = $.plot("#chart", [ ], {
         series: {
@@ -118,9 +130,16 @@ var app = new Vue({
         xaxis: { min: 0, max: 500}
       });
 
-      setInterval(function () {
+      app.interval = setInterval(function () {
+        if (app.i == app.marketdata.length - 1) {
+          clearInterval(app.interval);
+          app.interval = null;
+          app.mode='stopped';
+          return;
+        }
+
         var x = Math.floor((new Date()).getTime() / 1000); // current time
-        var y = parseFloat(marketdata[app.i++]);
+        var y = app.marketdata[app.i++];
         app.btcinusd = y;
         
         app.graphdata.push(y);
@@ -180,122 +199,9 @@ var app = new Vue({
     },
     onClickSellAll: function() {
       app.sell(1);
-    }
-  }
-});
-/*
-Highcharts.setOptions({
-  global: {
-    useUTC: false
-  }
-});
-
-
-Highcharts.chart('chart', {
-  chart: {
-    type: 'spline',
-    animation: false, //Highcharts.svg, // don't animate in old IE
-    marginRight: 10,
-    events: {
-      load: function () {
-        // set up the updating of the chart each second
-        var series = this.series[0];
-        var rsiseries = this.series[1];
-        setInterval(function () {
-          var x = (new Date()).getTime(); // current time
-          var y = marketdata[app.i++];
-          app.btcinusd = y;
-          
-          app.graphdata.push(y);
-          if (app.graphdata.length > 30) {
-            app.graphdata.shift();
-            app.rsi = rsi(app.graphdata);
-          } else {
-            app.rsi = 50;
-          }
-          series.addPoint([x, parseFloat(y)], true, true);
-          rsiseries.addPoint([x, app.rsi], true, true);
-          console.log(y, app.rsi);
-        }, 300);
-      }
-    }
-  },
-  title: {
-    text: ''
-  },
-  xAxis: {
-    type: 'datetime',
-    tickPixelInterval: 150
-  },
-  yAxis: [ {
-    title: {
-      text: 'Price USD'
     },
-    plotLines: [{
-      value: 0,
-      width: 3,
-      color: '#808080'
-    }]
-  }, 
-  {
-    title: {
-      text: 'RSI'
-    },
-    plotLines: [{
-      value: 0,
-      width: 2,
-      color: '#FF0030'
-    }],
-    opposite: true
-  }
-  ],
-  tooltip: {
-    formatter: function () {
-      return '<b>' + this.series.name + '</b><br/>' +
-        Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
-        Highcharts.numberFormat(this.y, 2);
+    summary: function() {
+
     }
-  },
-  legend: {
-    enabled: false
-  },
-  exporting: {
-    enabled: false
-  },
-  series: [{
-    name: 'Bitcoin price',
-    yaxis:1, 
-    data: (function () {
-      // generate an array of random data
-      var data = [],
-        time = (new Date()).getTime() - 100,
-        i;
-
-      for (i = -99; i <= 0; i += 1) {
-        data.push({
-          x: time + i * 1000,
-          y: 2600
-        });
-      }
-      return data;
-    }())
-  }, {
-    name: 'RSI',
-    yaxis: 2,
-    data: (function () {
-      // generate an array of random data
-      var data = [],
-        time = (new Date()).getTime() - 100,
-        i;
-
-      for (i = -99; i <= 0; i += 1) {
-        data.push({
-          x: time + i * 1000,
-          y: 50
-        });
-      }
-      return data;
-    }())
-  }]
+  }
 });
-*/

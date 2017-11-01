@@ -1,3 +1,5 @@
 .ticker, .buttons, .portfolio {
   margin-top: 25px;
 }
+
+[v-cloak] {display: none}

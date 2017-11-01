@@ -9,27 +9,28 @@
 </head>
 
 <body>
-  <div id="vue">
+  <div id="vue" v-cloak>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#">Market Trader</a>
     </nav>
       
     <div class="container">
-        <div v-if="!started">
+        <div v-if="mode=='start'">
           You start with $5000 of cash and $5000 worth of Bitcoin.<br >
           You can either: 
             <ul>
               <li>Buy Bitcoin with your cash</li>
               <li>Sell your Bitcoin for cash</li>
             </ul>
-          You can buy/sell 10% of your portfolio or 100% of your portfolio at a time.<br >
-          Each transaction costs you a 0.2% fee.<br>
-          Press start to begin!<br>
+          Each transaction costs you a 0.2% transaction fee.<br>
+          After 100 readings, an "RSI" value will appear. This is the "relative strength index" and indicates whether you should be buying or selling.<br>
+          <br>
 
-          <button v-on:click="onClickStart" type="button" class="btn btn-primary">Start</button>
+          <h3>Press start to begin!</h3>
+          <button v-on:click="onClickStart" type="button" class="btn btn-primary" :disabled="marketdata.length == 0">Start</button>
         </div>
         
-        <div v-if="started" class="container alert alert-secondary portfolio">
+        <div v-if="mode=='running'" class="container alert alert-secondary portfolio">
           <div class="row">
             <div class="col">
               Portfolio
@@ -48,26 +49,24 @@
           </div>
         </div>
 
-        <div v-if="started" class="btn-toolbar buttons" role="toolbar" aria-label="Toolbar with button groups">
+        <div v-if="mode=='running'" class="btn-toolbar buttons" role="toolbar" aria-label="Toolbar with button groups">
           <div class="btn-group mr-2" role="group" aria-label="First group">
-            <button v-on:keyup.left="onClickBuyAll" :disabled="usdbalance < 0.01" v-on:click="onClickBuyAll" type="button" class="btn btn-secondary">Buy All</button>
-          </div>
-          <div class="btn-group mr-2" role="group" aria-label="First group">
-            <button v-on:click="onClickBuy" :disabled="usdbalance < 0.01" type="button" class="btn btn-secondary">Buy 10%</button>
+            <button :disabled="usdbalance < 0.01" v-on:click="onClickBuyAll" type="button" class="btn btn-secondary">Buy All</button>
           </div>
           <div class="btn-group mr-2" role="group" aria-label="Second group">
-            <button v-on:click="onClickSell" :disabled="btcbalance < 0.005" type="button" class="btn btn-secondary">Sell 10%</button>
+            <button :disabled="btcbalance < 0.005" v-on:click="onClickSellAll" type="button" class="btn btn-secondary">Sell All</button>
           </div>
-          <div class="btn-group mr-2" role="group" aria-label="Second group">
-            <button v-on:keyup.right="onClickSellAll" :disabled="btcbalance < 0.005" v-on:click="onClickSellAll" type="button" class="btn btn-secondary">Sell All</button>
-          </div>
-        </div>
 
+        </div>
+ 
         <div id="chart" style="width:100%; height:200px; margin-top:20px"></div>
 
       </div>
 
-      <div v-if="started" class="container ticker">
+      <div v-if="mode=='running'" class="container ticker">
+        <div >
+          <span>{{ i }} / 2000</span>
+        </div>
         <div class="row">
           <div class="col">
             <h2>
@@ -84,17 +83,25 @@
           </div>
         </div>
       </div>
+
+      <div v-if="mode=='stopped'" class="container">
+         <h2>Simulation complete</h2>
+         You started with $10,000 of assets and ended with $<span>{{ total | twodp }}</span>.
+         <div v-if="total > 10000">
+           Congratulations! You invested wisely!
+         </div>
+         <div v-if="total <= 10000">
+            Oh well. At least it wasn't real money.
+         </div>
+      </div>
       <!-- Content here -->
     </div>
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-    crossorigin="anonymous"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1"
-    crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
   <script src="js/jquery.flot.js"></script>
   <script src="https://unpkg.com/vue"></script>
-  <script src="js/btc.js"></script>
   <script src="js/markettrader.js"></script>
 </body>
 
